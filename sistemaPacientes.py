@@ -102,7 +102,7 @@ def menu():
         print("3 - Excluir paciente")
         print("4 - Mostrar pacientes")
         print("5 - Transferir para planilha")
-        print("5 - Importar planilha")
+        print("6 - Importar planilha")
         print("7 - Priorizar paciente")
         print("0 - Sair")
         opcao = input("Escolha uma opção: ")
