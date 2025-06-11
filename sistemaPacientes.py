@@ -1,100 +1,140 @@
 import os
 from datetime import datetime
-import pandas as pd 
+import pandas as pd
+
 os.system("cls")
 
-lista_pacientes = []
-ultimo_id = 0
+pacientes = []
+ult_id = 0
 
-def adicionar_paciente():
-    global ultimo_id
-    paciente = {}
-    paciente["Nome"] = input("Digite o nome do paciente: ")
-    paciente["Idade"] = input("Digite a idade do paciente: ")
-    paciente["Data de Nascimento"] = input("Digite a data de nascimento do paciente (DD/MM/AAAA): ")
-    paciente["Sexo"] = input("Digite o sexo do paciente: ")
-    paciente["CPF"] = input("Digite o CPF do paciente: ")
-    ultimo_id += 1
-    paciente["ID"] = ultimo_id
-    lista_pacientes.append(paciente)
-    print(f"Paciente adicionado com ID {ultimo_id}.\n")
+# Função genérica para validar entradas
+def entrada(msg):
+    while True:
+        valor = input(msg)
+        if valor.strip() == "0":
+            print("Valor '0' não é permitido. Digite novamente.")
+        else:
+            return valor
 
-def alterar_paciente():
-    id_paciente = int(input("Digite o ID do paciente que deseja alterar: "))
-    for paciente in lista_pacientes:
-        if paciente["ID"] == id_paciente:
-            print(f"Paciente encontrado: {paciente}")
-            campo = input("Qual campo deseja alterar (Nome, Idade, Data de Nascimento, Sexo, CPF)? ")
-            if campo in paciente:
-                novo_valor = input(f"Digite o novo valor para {campo}: ")
-                paciente[campo] = novo_valor
-                print("Paciente alterado com sucesso.\n")
-            else:
-                print("Campo inválido.\n")
-            return
-    print("Paciente não encontrado.\n")
+def add_pac():
+    """Adiciona um novo paciente à lista"""
+    global ult_id
+    try:
+        p = {}
+        p["Nome"] = entrada("Nome: ")
+        p["Idade"] = entrada("Idade: ")
+        p["Nascimento"] = entrada("Data de nascimento (DD/MM/AAAA): ")
+        p["Sexo"] = entrada("Sexo: ")
+        p["CPF"] = entrada("CPF: ")
+        ult_id += 1
+        p["ID"] = ult_id
+        pacientes.append(p)
+        print(f"Paciente adicionado com ID {ult_id}.\n")
+    except Exception as e:
+        print(f"Erro ao adicionar paciente: {e}\n")
 
-def excluir_paciente():
-    id_paciente = int(input("Digite o ID do paciente que deseja excluir: "))
-    for paciente in lista_pacientes:
-        if paciente["ID"] == id_paciente:
-            lista_pacientes.remove(paciente)
-            print("Paciente excluído com sucesso.\n")
-            return
-    print("Paciente não encontrado.\n")
+def alt_pac():
+    """Altera os dados de um paciente existente"""
+    try:
+        pid = int(entrada("ID do paciente a alterar: "))
+        for p in pacientes:
+            if p["ID"] == pid:
+                print(f"Paciente encontrado: {p}")
+                campo = entrada("Campo a alterar (Nome, Idade, Nascimento, Sexo, CPF): ")
+                if campo in p:
+                    novo = entrada(f"Novo valor para {campo}: ")
+                    p[campo] = novo
+                    print("Paciente alterado com sucesso.\n")
+                else:
+                    print("Campo inválido.\n")
+                return
+        print("Paciente não encontrado.\n")
+    except ValueError:
+        print("ID inválido. Digite um número inteiro.\n")
+    except Exception as e:
+        print(f"Erro ao alterar paciente: {e}\n")
 
-def mostrar_pacientes():
-    if not lista_pacientes:
+def exc_pac():
+    """Exclui um paciente da lista"""
+    try:
+        pid = int(entrada("ID do paciente a excluir: "))
+        for p in pacientes:
+            if p["ID"] == pid:
+                pacientes.remove(p)
+                print("Paciente excluído com sucesso.\n")
+                return
+        print("Paciente não encontrado.\n")
+    except ValueError:
+        print("ID inválido. Digite um número inteiro.\n")
+    except Exception as e:
+        print(f"Erro ao excluir paciente: {e}\n")
+
+def ver_pac():
+    """Exibe todos os pacientes cadastrados"""
+    if not pacientes:
         print("Nenhum paciente cadastrado.\n")
         return
     print("\n=== Lista de Pacientes ===")
-    for paciente in lista_pacientes:
-        print(f"ID: {paciente['ID']}")
-        print(f"Nome: {paciente['Nome']}")
-        print(f"Idade: {paciente['Idade']}")
-        print(f"Data de Nascimento: {paciente['Data de Nascimento']}")
-        print(f"Sexo: {paciente['Sexo']}")
-        print(f"CPF: {paciente['CPF']}\n")
+    for p in pacientes:
+        print(f"ID: {p['ID']}")
+        print(f"Nome: {p['Nome']}")
+        print(f"Idade: {p['Idade']}")
+        print(f"Nascimento: {p['Nascimento']}")
+        print(f"Sexo: {p['Sexo']}")
+        print(f"CPF: {p['CPF']}\n")
 
-def transferirParaExcel(lista_pacientes) -> None:
-    nome_arquivo = input("Pressione [Enter] para gerar um arquivo com a data-hora atual ou digite o nome do arquivo desejado: ")
+def salvar_excel(pacientes) -> None:
+    """Exporta os dados para uma planilha Excel"""
+    try:
+        nome = entrada("Pressione [Enter] para nome automático ou digite o nome do arquivo: ")
+        if nome.strip() == "":
+            agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            nome = f"pacientes_{agora}.xlsx"
+        elif not nome.lower().endswith(".xlsx"):
+            nome += ".xlsx"
 
-    if nome_arquivo.strip() == "":
-        agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        nome_arquivo = f"arquivo_{agora}.xlsx"
-    else:
-        if not nome_arquivo.lower().endswith(".xlsx"):
-            nome_arquivo += ".xlsx"
+        df = pd.DataFrame(pacientes)
+        df.to_excel(f"./{nome}", index=False)
+        print(f"Planilha '{nome}' criada com sucesso!")
+    except Exception as e:
+        print(f"Erro ao salvar planilha: {e}\n")
 
-    df = pd.DataFrame(lista_pacientes)
-    df.to_excel(f"./{nome_arquivo}", index=False)
+def ler_excel() -> None:
+    """Importa dados de uma planilha Excel"""
+    try:
+        nome = entrada("Nome do arquivo (sem .xlsx): ")
+        caminho = f'./{nome}.xlsx'
+        df = pd.read_excel(caminho)
+        print("Dados lidos do Excel:")
+        print(df)
+    except FileNotFoundError:
+        print("Arquivo não encontrado.\n")
+    except Exception as e:
+        print(f"Erro ao ler planilha: {e}\n")
 
-    print(f"Planilha '{nome_arquivo}' criada com sucesso!")
-
-def transferirParaPython() -> None:
-    arquivo = input("Digite o nome do arquivo que deseja ler: ")
-
-    caminho_arquivo = f'./{arquivo}.xlsx'
-    df = pd.read_excel(caminho_arquivo)
-    print("Dados lidos do Excel:")
-    print(df)
-
-def priorizar_paciente():
-    id_paciente = int(input("Digite o ID do paciente que deseja priorizar: "))
-    for paciente in lista_pacientes:
-        if paciente["ID"] == id_paciente:
-            lista_pacientes.remove(paciente)
-            posicao = int(input(f"Digite a nova posição para o paciente (0 até {len(lista_pacientes)}): "))
-            if posicao < 0:
-                posicao = 0
-            elif posicao > len(lista_pacientes):
-                posicao = len(lista_pacientes)
-            lista_pacientes.insert(posicao, paciente)
-            print(f"Paciente com ID {id_paciente} movido para a posição {posicao} com sucesso!\n")
-            return
-    print("Paciente não encontrado.\n")
+def priorizar():
+    """Move um paciente para uma posição prioritária na lista"""
+    try:
+        pid = int(entrada("ID do paciente a priorizar: "))
+        for p in pacientes:
+            if p["ID"] == pid:
+                pacientes.remove(p)
+                pos = int(entrada(f"Nova posição (0 até {len(pacientes)}): "))
+                if pos < 0:
+                    pos = 0
+                elif pos > len(pacientes):
+                    pos = len(pacientes)
+                pacientes.insert(pos, p)
+                print(f"Paciente com ID {pid} movido para posição {pos} com sucesso!\n")
+                return
+        print("Paciente não encontrado.\n")
+    except ValueError:
+        print("Entrada inválida. Use apenas números inteiros.\n")
+    except Exception as e:
+        print(f"Erro ao priorizar paciente: {e}\n")
 
 def menu():
+    """Menu principal do sistema"""
     while True:
         print("=== MENU ===")
         print("1 - Adicionar paciente")
@@ -105,23 +145,23 @@ def menu():
         print("6 - Importar planilha")
         print("7 - Priorizar paciente")
         print("0 - Sair")
-        opcao = input("Escolha uma opção: ")
+        opc = input("Escolha uma opção: ")
 
-        if opcao == "1":
-            adicionar_paciente()
-        elif opcao == "2":
-            alterar_paciente()
-        elif opcao == "3":
-            excluir_paciente()
-        elif opcao == "4":
-            mostrar_pacientes()
-        elif opcao == "5":
-            transferirParaExcel(lista_pacientes)
-        elif opcao == "6":
-            transferirParaPython()
-        elif opcao == "7":
-            priorizar_paciente()
-        elif opcao == "0":
+        if opc == "1":
+            add_pac()
+        elif opc == "2":
+            alt_pac()
+        elif opc == "3":
+            exc_pac()
+        elif opc == "4":
+            ver_pac()
+        elif opc == "5":
+            salvar_excel(pacientes)
+        elif opc == "6":
+            ler_excel()
+        elif opc == "7":
+            priorizar()
+        elif opc == "0":
             print("Encerrando programa...")
             break
         else:
