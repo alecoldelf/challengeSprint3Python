@@ -1,20 +1,23 @@
+# Challenge Sprint 4 - 1ESPR - AGENDIFY
+# Alexandre Delfino.....: RM560059
+# Enzo Luciano..........: RM559557
+# Felipe Molinari.......: RM559885
+# Livia Pereira Dias....: RM559414
+# Luigi Thiengo.........: RM560755
+
 import os
 from datetime import datetime
 import pandas as pd
 
 os.system("cls")
 
+# Função de entrada corrigida para aceitar "0"
+def entrada(msg):
+    valor = input(msg)
+    return valor.strip()
+
 pacientes = []
 ult_id = 0
-
-# Função genérica para validar entradas
-def entrada(msg):
-    while True:
-        valor = input(msg)
-        if valor.strip() == "0":
-            print("Valor '0' não é permitido. Digite novamente.")
-        else:
-            return valor
 
 def add_pac():
     """Adiciona um novo paciente à lista"""
