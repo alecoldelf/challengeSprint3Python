@@ -92,3 +92,6 @@ graph TD
     C6 --> B
     C7 --> B
 ```
+
+##Vídeo apresentação no YouTube
+https://youtu.be/OBowbxz7zb0
